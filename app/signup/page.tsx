@@ -1,12 +1,12 @@
 import CarpoolLogo from '@/app/ui/carpool-logo';
-import LoginForm from '@/app/ui/login-form';
+import SignUpForm from '@/app/ui/signup-form';
 import { Metadata } from 'next';
  
 export const metadata: Metadata = {
-  title: 'Login',
+  title: 'Sign Up',
 };
 
-export default function LoginPage() {
+export default function SignUpPage() {
   return (
     <main className="flex items-center justify-center h-screen">
       <div className="relative mx-auto flex w-full max-w-[400px] flex-col space-y-2.5 p-4 md:-mt-32">
@@ -15,7 +15,7 @@ export default function LoginPage() {
             <CarpoolLogo />
           </div>
         </div>
-        <LoginForm />
+        <SignUpForm />
       </div>
     </main>
   );
