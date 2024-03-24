@@ -5,6 +5,7 @@ import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
+import bcrypt from 'bcrypt';
  
 const InvoiceSchema = z.object({
   id: z.string(),
@@ -53,10 +54,8 @@ export async function createInvoice(prevState: State, formData: FormData) {
     const amountInCents = amount * 100;
     const date = new Date().toISOString().split('T')[0];
 
-    // Test it out:
-    // console.log();
     // Insert data into the database
-    try{
+    try {
       await sql`
         INSERT INTO invoices (customer_id, amount, status, date)
         VALUES (${customerId}, ${amountInCents}, ${status}, ${date})`;
@@ -74,7 +73,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
 // Use Zod to update the expected types
 const UpdateInvoice = InvoiceSchema.omit({ id: true, date: true });
  
-// ...
+// Update invoice
  
 export async function updateInvoice(
   id: string,
@@ -125,6 +124,7 @@ export async function deleteInvoice(id: string) {
   }
 }
 
+// Log in user
   
 export async function authenticate(
   prevState: string | undefined,
@@ -138,4 +138,67 @@ export async function authenticate(
     }
     throw error;
   }
+}
+
+// Sign user up
+
+const UserSchema = z.object({
+  id: z.string(),
+  name: z.string({
+    invalid_type_error: 'Please add a name.',
+  }),
+  email: z.string({
+    invalid_type_error: 'Please add an email.',
+  }),
+  password: z.string({
+    invalid_type_error: 'Please add a password.',
+  }),
+});
+ 
+const CreateUser = UserSchema.omit({ id: true });
+
+export type UserState = {
+  errors?: {
+    name?: string[];
+    email?: string[];
+    password?: string[];
+  };
+  message?: string | null;
+};
+ 
+export async function createUser(prevState: UserState, formData: FormData) {
+    
+    // Validate form fields using Zod
+    const validatedUserFields = CreateUser.safeParse({
+      name: formData.get('name'),
+      email: formData.get('email'),
+      password: formData.get('password'),
+    });
+
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedUserFields.success) {
+      return {
+        errors: validatedUserFields.error.flatten().fieldErrors,
+        message: 'Missing Fields. Failed to Create Account.',
+      };
+    }
+
+    // Prepare data for insertion into the database
+    const { name, email, password } = validatedUserFields.data;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert data into the database
+    try {
+      await sql`
+        INSERT INTO users (name, email, password)
+        VALUES (${name}, ${email}, ${hashedPassword})`;
+    } catch (error) {
+      return {
+        message: 'Database Error: Failed to Create Account.',
+      };
+    }
+  
+    // Sign in and redirect the user.
+    redirect('/');
 }
