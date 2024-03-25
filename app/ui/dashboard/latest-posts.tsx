@@ -31,11 +31,8 @@ export default async function LastestPosts() {
               >
                 <div className="flex items-center">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold md:text-base">
-                      {post.start_location}
-                    </p>
-                    <p className="hidden text-sm text-gray-500 sm:block">
-                      {post.end_location}
+                    <p className="truncate font-bold text-sm md:text-base">
+                      {post.start_location} &#8594; {post.end_location}
                     </p>
                   </div>
                 </div>
