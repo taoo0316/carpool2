@@ -1,18 +1,18 @@
-import Form from '@/app/ui/posts/edit-form';
+import EditPostForm from '@/app/ui/posts/edit-form';
 import Breadcrumbs from '@/app/ui/posts/breadcrumbs';
-import { fetchCustomers, fetchInvoiceById } from '@/app/lib/data';
-import { CustomerField, InvoiceForm } from '@/app/lib/definitions';
+import { fetchUsers, fetchPostById } from '@/app/lib/data';
+import { UserField, PostForm } from '@/app/lib/definitions';
 import { notFound } from 'next/navigation';
  
 export default async function Page({ params }: { params: { id: string } }) {
 
     const id = params.id;
-    const [invoice, customers] : [InvoiceForm | undefined , CustomerField[] | undefined] = await Promise.all([
-        fetchInvoiceById(id),
-        fetchCustomers(),
+    const [post, users] : [PostForm | undefined , UserField[] | undefined] = await Promise.all([
+        fetchPostById(id),
+        fetchUsers(),
       ]);
 
-    if (!invoice) {
+    if (!post) {
         notFound();
     }
 
@@ -20,15 +20,15 @@ export default async function Page({ params }: { params: { id: string } }) {
         <main>
         <Breadcrumbs
             breadcrumbs={[
-            { label: 'Invoices', href: '/dashboard/invoices' },
+            { label: 'Posts', href: '/dashboard/posts' },
             {
-                label: 'Edit Invoice',
-                href: `/dashboard/invoices/${id}/edit`,
+                label: 'Edit Post',
+                href: `/dashboard/posts/${id}/edit`,
                 active: true,
             },
             ]}
         />
-        <Form invoice={invoice!} customers={customers} />
+        <EditPostForm post={post!} users={users} />
         </main>
     );
 }

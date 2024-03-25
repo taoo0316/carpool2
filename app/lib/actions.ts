@@ -51,7 +51,7 @@ export async function createPost(prevState: State, formData: FormData) {
     
     // Validate form fields using Zod
     const validatedFields = CreatePost.safeParse({
-      authorId: formData.get('customerId'),
+      authorId: formData.get('authorId'),
       carpoolers: formData.get('carpoolers'),
       status: formData.get('status'),
       startLocation: formData.get('startLocation'),
@@ -60,6 +60,8 @@ export async function createPost(prevState: State, formData: FormData) {
       rideTime: formData.get('rideTime'),
       description: formData.get('description')
     });
+
+    console.log(validatedFields);
 
     // If form validation fails, return errors early. Otherwise, continue.
     if (!validatedFields.success) {
@@ -95,7 +97,7 @@ export async function createPost(prevState: State, formData: FormData) {
           ride_service,
           description,
           carpoolers,
-          status,
+          status)
         VALUES (
           ${authorId}, 
           ${startLocation}, 

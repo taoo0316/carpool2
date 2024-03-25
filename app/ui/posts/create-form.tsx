@@ -21,18 +21,18 @@ export default function Form({ users }: { users: UserField[] }) {
     <form action={dispatch}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
 
-        {/* User Name */}
+        {/* Author Name */}
         <div className="mb-4">
           <label htmlFor="customer" className="mb-2 block text-sm font-medium">
             Choose author
           </label>
           <div className="relative">
             <select
-              id="customer"
-              name="customerId"
+              id="authorId"
+              name="authorId"
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               defaultValue=""
-              aria-describedby="customer-error"
+              aria-describedby="author-error"
             >
               <option value="" disabled>
                 Select an author
@@ -47,7 +47,7 @@ export default function Form({ users }: { users: UserField[] }) {
           </div>
           {state.errors?.authorId ? (
             <div
-              id="customer-error"
+              id="author-error"
               aria-live="polite"
               className="mt-2 text-sm text-red-500"
             >
@@ -72,14 +72,14 @@ export default function Form({ users }: { users: UserField[] }) {
                 step="1"
                 placeholder="Enter number of carpoolers"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                aria-describedby="amount-error"
+                aria-describedby="carpooler-error"
               />
               <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
           </div>
           {state.errors?.carpoolers ? (
             <div
-              id="customer-error"
+              id="carpooler-error"
               aria-live="polite"
               className="mt-2 text-sm text-red-500"
             >
@@ -108,7 +108,7 @@ export default function Form({ users }: { users: UserField[] }) {
                 />
                 <label
                   htmlFor="open"
-                  className="ml-2 flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300"
+                  className="ml-2 flex items-center gap-1.5 rounded-full bg-green-500 text-white px-3 py-1.5 text-xs font-medium"
                 >
                   Open <ClockIcon className="h-4 w-4" />
                 </label>
@@ -124,7 +124,7 @@ export default function Form({ users }: { users: UserField[] }) {
                 />
                 <label
                   htmlFor="closed"
-                  className="ml-2 flex items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white dark:text-gray-300"
+                  className="ml-2 flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-gray-500 text-xs font-medium"
                 >
                   Closed <CheckIcon className="h-4 w-4" />
                 </label>
@@ -143,157 +143,157 @@ export default function Form({ users }: { users: UserField[] }) {
               ))}
             </div>
           ) : null}
-          {state.message ? (
-            <div
-              id="message-error"
-              aria-live="polite"
-              className="mt-2 text-sm text-red-500"
-            >
-              <p key={state.message}>{state.message}</p>
-            </div>
-          ) : null}
-      </div>
 
-      {/* Locations */}
-      <div className="mb-4">
-          <label htmlFor="startLocation" className="mb-2 block text-sm font-medium">
-            Choose start location
-          </label>
-          <div className="relative mt-2 rounded-md">
+        {/* Locations */}
+        <div className="mb-4">
+            <label htmlFor="startLocation" className="mb-2 block text-sm font-medium">
+              Choose start location
+            </label>
+            <div className="relative mt-2 rounded-md">
+              <div className="relative">
+                <input
+                  id="startLocation"
+                  name="startLocation"
+                  type="text"
+                  placeholder="Enter start location"
+                  className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                  aria-describedby="start-location-error"
+                />
+                <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+              </div>
+            </div>
+            {state.errors?.startLocation ? (
+              <div
+                id="start-location-error"
+                aria-live="polite"
+                className="mt-2 text-sm text-red-500"
+              >
+                {state.errors.startLocation.map((error: string) => (
+                  <p key={error}>{error}</p>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          <div className="mb-4">
+            <label htmlFor="startLocation" className="mb-2 block text-sm font-medium">
+              Choose end location
+            </label>
+            <div className="relative mt-2 rounded-md">
+              <div className="relative">
+                <input
+                  id="endLocation"
+                  name="endLocation"
+                  type="text"
+                  placeholder="Enter end location"
+                  className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                  aria-describedby="end-location-error"
+                />
+                <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+              </div>
+            </div>
+            {state.errors?.endLocation ? (
+              <div
+                id="end-location-error"
+                aria-live="polite"
+                className="mt-2 text-sm text-red-500"
+              >
+                {state.errors.endLocation.map((error: string) => (
+                  <p key={error}>{error}</p>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          {/* Ride Service Dropdown */}
+          <div className="mb-4">
+            <label htmlFor="rideService" className="mb-2 block text-sm font-medium">
+              Choose Ride Service
+            </label>
             <div className="relative">
-              <input
-                id="startLocation"
-                name="startLocation"
-                type="text"
-                placeholder="Enter start location"
+              <select
+                id="rideService"
+                name="rideService"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                aria-describedby="start-location-error"
-              />
-              <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                defaultValue=""
+                aria-describedby="ride-service-error"
+              >
+                <option value="" disabled>
+                  Select a ride service
+                </option>
+                <option value="Grab">Grab</option>
+                <option value="Gojek">Gojek</option>
+                <option value="Ryde">Ryde</option>
+                <option value="ComfortDelGro">ComfortDelGro</option>
+                <option value="TADA">TADA</option>
+              </select>
             </div>
+            {state.errors?.rideService ? (
+              <div
+                id="ride-service-error"
+                aria-live="polite"
+                className="mt-2 text-sm text-red-500"
+              >
+                {state.errors.rideService.map((error: string) => (
+                  <p key={error}>{error}</p>
+                ))}
+              </div>
+            ) : null}
           </div>
-          {state.errors?.startLocation ? (
-            <div
-              id="start-location-error"
-              aria-live="polite"
-              className="mt-2 text-sm text-red-500"
-            >
-              {state.errors.startLocation.map((error: string) => (
-                <p key={error}>{error}</p>
-              ))}
-            </div>
-          ) : null}
-        </div>
-        <div className="mb-4">
-          <label htmlFor="startLocation" className="mb-2 block text-sm font-medium">
-            Choose end location
-          </label>
-          <div className="relative mt-2 rounded-md">
-            <div className="relative">
-              <input
-                id="endLocation"
-                name="endLocation"
-                type="text"
-                placeholder="Enter end location"
-                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                aria-describedby="end-location-error"
-              />
-              <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
-          </div>
-          {state.errors?.endLocation ? (
-            <div
-              id="end-location-error"
-              aria-live="polite"
-              className="mt-2 text-sm text-red-500"
-            >
-              {state.errors.endLocation.map((error: string) => (
-                <p key={error}>{error}</p>
-              ))}
-            </div>
-          ) : null}
-        </div>
 
-        {/* Ride Service Dropdown */}
-        <div className="mb-4">
-          <label htmlFor="rideService" className="mb-2 block text-sm font-medium">
-            Choose Ride Service
-          </label>
-          <div className="relative">
-            <select
-              id="rideService"
-              name="rideService"
-              className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue=""
-              aria-describedby="ride-service-error"
-            >
-              <option value="" disabled>
-                Select a ride service
-              </option>
-              <option value="Grab">Grab</option>
-              <option value="Gojek">Gojek</option>
-              <option value="Ryde">Ryde</option>
-              <option value="ComfortDelGro">ComfortDelGro</option>
-              <option value="TADA">TADA</option>
-            </select>
+          {/* Ride Time Input */}
+          <div className="mb-4">
+            <label htmlFor="rideTime" className="mb-2 block text-sm font-medium">
+              Choose Ride Time
+            </label>
+            <input
+              id="rideTime"
+              name="rideTime"
+              type="datetime-local"
+              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2"
+              aria-describedby="ride-time-error"
+            />
           </div>
-          {state.errors?.rideService ? (
-            <div
-              id="end-location-error"
-              aria-live="polite"
-              className="mt-2 text-sm text-red-500"
-            >
-              {state.errors.rideService.map((error: string) => (
-                <p key={error}>{error}</p>
-              ))}
+          {state.errors?.rideTime ? (
+              <div
+                id="ride-time-error"
+                aria-live="polite"
+                className="mt-2 text-sm text-red-500"
+              >
+                {state.errors.rideTime.map((error: string) => (
+                  <p key={error}>{error}</p>
+                ))}
+              </div>
+            ) : null}
+          
+          {/* Optional description */}
+          <div className="mb-4">
+            <label htmlFor="startLocation" className="mb-2 block text-sm font-medium">
+              Description
+            </label>
+            <div className="relative mt-2 rounded-md">
+              <div className="relative">
+                <input
+                  id="description"
+                  name="description"
+                  type="text"
+                  placeholder="Enter description"
+                  defaultValue=""
+                  className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                />
+                <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+              </div>
             </div>
-          ) : null}
-        </div>
-
-        {/* Ride Time Input */}
-        <div className="mb-4">
-          <label htmlFor="rideTime" className="mb-2 block text-sm font-medium">
-            Choose Ride Time
-          </label>
-          <input
-            id="rideTime"
-            name="rideTime"
-            type="datetime-local"
-            className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2"
-            aria-describedby="ride-time-error"
-          />
-        </div>
-        {state.errors?.rideTime ? (
-            <div
-              id="end-location-error"
-              aria-live="polite"
-              className="mt-2 text-sm text-red-500"
-            >
-              {state.errors.rideTime.map((error: string) => (
-                <p key={error}>{error}</p>
-              ))}
-            </div>
-          ) : null}
-        
-        {/* Optional description */}
-        <div className="mb-4">
-          <label htmlFor="startLocation" className="mb-2 block text-sm font-medium">
-            Description
-          </label>
-          <div className="relative mt-2 rounded-md">
-            <div className="relative">
-              <input
-                id="description"
-                name="description"
-                type="text"
-                placeholder="Enter description"
-                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              />
-              <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
+            {state.message ? (
+              <div
+                id="message-error"
+                aria-live="polite"
+                className="mt-2 text-sm text-red-500"
+              >
+                <p key={state.message}>{state.message}</p>
+              </div>
+            ) : null}
           </div>
         </div>
-
 
       <div className="mt-6 flex justify-end gap-4">
         <Link

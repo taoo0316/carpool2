@@ -3,21 +3,21 @@ import Breadcrumbs from '@/app/ui/posts/breadcrumbs';
 import { fetchUsers } from '@/app/lib/data';
  
 export default async function Page() {
-  const customers = await fetchUsers();
+  const users = await fetchUsers();
  
   return (
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: 'Invoices', href: '/dashboard/invoices' },
+          { label: 'Post', href: '/dashboard/posts' },
           {
-            label: 'Create Invoice',
-            href: '/dashboard/invoices/create',
+            label: 'Create Post',
+            href: '/dashboard/posts/create',
             active: true,
           },
         ]}
       />
-      <Form customers={customers} />
+      <Form users={users} />
     </main>
   );
 }

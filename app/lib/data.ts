@@ -93,7 +93,7 @@ export async function fetchFilteredPosts( query: string, currentPage: number,) {
         posts.ride_time::text ILIKE ${`%${query}%`} OR
         posts.ride_service ILIKE ${`%${query}%`} OR
         posts.status ILIKE ${`%${query}%`}
-      ORDER BY posts.date DESC
+      ORDER BY posts.post_time DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
@@ -132,7 +132,7 @@ export async function fetchPostById(id: string) {
   try {
     const data = await sql<PostForm>`
       SELECT
-        posts.posts.id,
+        posts.id,
         posts.author_id,
         posts.start_location,
         posts.end_location,
@@ -141,7 +141,7 @@ export async function fetchPostById(id: string) {
         posts.ride_service,
         posts.description,
         posts.carpoolers,
-        posts.status,
+        posts.status
       FROM posts
       WHERE posts.id = ${id};
     `;

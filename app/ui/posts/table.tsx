@@ -1,6 +1,5 @@
 import { UpdatePost, DeletePost } from '@/app/ui/posts/buttons';
 import PostStatus from '@/app/ui/posts/status';
-import { formatDateToLocal } from '@/app/lib/utils';
 import { fetchFilteredPosts } from '@/app/lib/data';
 
 export default async function PostsTable({
@@ -27,7 +26,7 @@ export default async function PostsTable({
                     <div className="mb-2 flex items-center">
                       <p>{post.name}</p>
                     </div>
-                    <p className="text-sm text-gray-500">{post.ride_time}</p>
+                    <p className="text-sm text-gray-500">{post.ride_time.toString()}</p>
                   </div>
                   <PostStatus status={post.status} />
                 </div>
@@ -79,7 +78,7 @@ export default async function PostsTable({
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {post.ride_time}
+                    {post.ride_time.toString().split(':00 GMT')[0]}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {post.start_location}
