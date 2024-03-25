@@ -1,4 +1,4 @@
-import CustomersTable from '@/app/ui/customers/table';
+import UsersTable from '@/app/ui/users/table';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'Customers',
 };
 
-export default async function CustomersPage({
+export default async function UsersPage({
   searchParams,
 }: {
   searchParams?: {
@@ -17,7 +17,7 @@ export default async function CustomersPage({
   const query = searchParams?.query || '';
     return (
       <Suspense fallback={<p>Loading...</p>}>
-        <CustomersTable query={query}/>
+        <UsersTable query={query}/>
       </Suspense>
     )
 }

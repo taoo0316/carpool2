@@ -7,57 +7,82 @@ import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import bcrypt from 'bcrypt';
  
-const InvoiceSchema = z.object({
+const PostSchema = z.object({
   id: z.string(),
-  customerId: z.string({
-    invalid_type_error: 'Please select a customer.',
+  authorId: z.string({
+    invalid_type_error: 'Please select an author.',
   }),
-  amount: z.coerce
-    .number()
-    .gt(0, { message: 'Please enter an amount greater than $0.' }),
-  status: z.enum(['pending', 'paid'], {
-    invalid_type_error: 'Please select an invoice status.',
+  startLocation: z.string({
+    invalid_type_error: 'Please select an author.',
   }),
-  date: z.string(),
+  endLocation: z.string({
+    invalid_type_error: 'Please select an author.',
+  }),
+  status: z.enum(['open', 'closed'], {
+    invalid_type_error: 'Please select a post status.',
+  }),
+  rideService: z.enum(['Grab', 'Gojek', 'Ryde', 'ComfortDelGro', 'TADA'], {
+    invalid_type_error: 'Please select a ride service.',
+  }),
+  rideTime: z.string(),
+  postTime: z.string(),
+  descrition: z.string(),
+  carpoolers: z.string()
 });
  
-const CreateInvoice = InvoiceSchema.omit({ id: true, date: true });
+const CreatePost = PostSchema.omit({ id: true, date: true });
 
 export type State = {
   errors?: {
-    customerId?: string[];
-    amount?: string[];
+    authorId?: string[];
+    startLocation?: string[];
+    endLocation?: string[];
     status?: string[];
+    rideService?: string[];
+    rideTime?: string[];
+    carpoolers?: string[];
   };
   message?: string | null;
 };
  
-export async function createInvoice(prevState: State, formData: FormData) {
+export async function createPost(prevState: State, formData: FormData) {
     
     // Validate form fields using Zod
-    const validatedFields = CreateInvoice.safeParse({
-      customerId: formData.get('customerId'),
-      amount: formData.get('amount'),
+    const validatedFields = CreatePost.safeParse({
+      authorId: formData.get('customerId'),
+      carpoolers: formData.get('carpoolers'),
       status: formData.get('status'),
+      startLocation: formData.get('startLocation'),
+      endLocation: formData.get('endLocation'),
+      rideService: formData.get('rideService'),
+      rideTime: formData.get('rideTime'),
+      description: formData.get('description')
     });
 
     // If form validation fails, return errors early. Otherwise, continue.
     if (!validatedFields.success) {
       return {
         errors: validatedFields.error.flatten().fieldErrors,
-        message: 'Missing Fields. Failed to Create Invoice.',
+        message: 'Missing Fields. Failed to Create Post.',
       };
     }
 
     // Prepare data for insertion into the database
-    const { customerId, amount, status } = validatedFields.data;
-    const amountInCents = amount * 100;
+    const { 
+      authorId, 
+      carpoolers, 
+      status, 
+      startLocation, 
+      endLocation, 
+      rideService, 
+      rideTime,
+      description } = validatedFields.data;
     const date = new Date().toISOString().split('T')[0];
 
     // Insert data into the database
     try {
       await sql`
-        INSERT INTO invoices (customer_id, amount, status, date)
+        INSERT INTO posts (author_id, carpoolers, status, start_location, end_location, ride_service, description)
         VALUES (${customerId}, ${amountInCents}, ${status}, ${date})`;
     } catch (error) {
       return {
@@ -71,7 +96,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
 }
 
 // Use Zod to update the expected types
-const UpdateInvoice = InvoiceSchema.omit({ id: true, date: true });
+const UpdateInvoice = PostSchema.omit({ id: true, date: true });
  
 // Update invoice
  
@@ -114,13 +139,13 @@ export async function updateInvoice(
   redirect('/dashboard/invoices');
 }
 
-export async function deleteInvoice(id: string) {
+export async function deletePost(id: string) {
   // throw new Error('Failed to Delete Invoice');
   try {
-    await sql`DELETE FROM invoices WHERE id = ${id}`;
-    revalidatePath('/dashboard/invoices');
+    await sql`DELETE FROM posts WHERE id = ${id}`;
+    revalidatePath('/dashboard/posts');
   } catch (error) {
-    return { message: 'Database Error: Failed to Delete Invoice.' };
+    return { message: 'Database Error: Failed to Delete Post.' };
   }
 }
 
