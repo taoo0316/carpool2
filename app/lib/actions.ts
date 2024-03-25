@@ -13,10 +13,10 @@ const PostSchema = z.object({
     invalid_type_error: 'Please select an author.',
   }),
   startLocation: z.string({
-    invalid_type_error: 'Please select an author.',
+    invalid_type_error: 'Please select a start location.',
   }),
   endLocation: z.string({
-    invalid_type_error: 'Please select an author.',
+    invalid_type_error: 'Please select an end location.',
   }),
   status: z.enum(['open', 'closed'], {
     invalid_type_error: 'Please select a post status.',
@@ -26,11 +26,13 @@ const PostSchema = z.object({
   }),
   rideTime: z.string(),
   postTime: z.string(),
-  descrition: z.string(),
-  carpoolers: z.string()
+  description: z.string(),
+  carpoolers: z.coerce
+    .number()
+    .gt(0, { message: 'Please enter a number of carpoolers greater than 0.' }),
 });
  
-const CreatePost = PostSchema.omit({ id: true, date: true });
+const CreatePost = PostSchema.omit({ id: true, postTime: true });
 
 export type State = {
   errors?: {
@@ -77,66 +79,111 @@ export async function createPost(prevState: State, formData: FormData) {
       rideService, 
       rideTime,
       description } = validatedFields.data;
-    const date = new Date().toISOString().split('T')[0];
+
+    const rideTimeSQL = rideTime.replace('T', ' ') + ':00';
+    const currentTimeSQL = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
     // Insert data into the database
     try {
       await sql`
-        INSERT INTO posts (author_id, carpoolers, status, start_location, end_location, ride_service, description)
-        VALUES (${customerId}, ${amountInCents}, ${status}, ${date})`;
+        INSERT INTO posts (
+          author_id,
+          start_location,
+          end_location,
+          ride_time,
+          post_time,
+          ride_service,
+          description,
+          carpoolers,
+          status,
+        VALUES (
+          ${authorId}, 
+          ${startLocation}, 
+          ${endLocation}, 
+          ${rideTimeSQL},
+          ${currentTimeSQL},
+          ${rideService},
+          ${description},
+          ${carpoolers},
+          ${status})`;
     } catch (error) {
       return {
-        message: 'Database Error: Failed to Create Invoice.',
+        message: 'Database Error: Failed to Create Post.',
       };
     }
   
     // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath('/dashboard/invoices');
-    redirect('/dashboard/invoices');
+    revalidatePath('/dashboard/posts');
+    redirect('/dashboard/posts');
 }
 
 // Use Zod to update the expected types
-const UpdateInvoice = PostSchema.omit({ id: true, date: true });
+const UpdatePost = PostSchema.omit({ id: true, date: true });
  
-// Update invoice
+// Update post
  
-export async function updateInvoice(
+export async function updatePost(
   id: string,
   prevState: State,
   formData: FormData
 ){
 
   // Validate form fields using Zod
-  const validatedFields = UpdateInvoice.safeParse({
-    customerId: formData.get('customerId'),
-    amount: formData.get('amount'),
+  const validatedFields = UpdatePost.safeParse({
+    authorId: formData.get('customerId'),
+    carpoolers: formData.get('carpoolers'),
     status: formData.get('status'),
+    startLocation: formData.get('startLocation'),
+    endLocation: formData.get('endLocation'),
+    rideService: formData.get('rideService'),
+    rideTime: formData.get('rideTime'),
+    description: formData.get('description')
   });
 
   // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Update Invoice.',
+      message: 'Missing Fields. Failed to Update Post.',
     };
   }
 
-  // Prepare data for insertion into the database
-  const { customerId, amount, status } = validatedFields.data;
-  const amountInCents = amount * 100;
+  // Prepare data for update in the database
+  const { 
+    authorId, 
+    carpoolers, 
+    status, 
+    startLocation, 
+    endLocation, 
+    rideService, 
+    rideTime,
+    description } = validatedFields.data;
+
+  const rideTimeSQL = rideTime.replace('T', ' ') + ':00';
+  const currentTimeSQL = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
   // Insert data into the database
   try {
     await sql`
-      UPDATE invoices
-      SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+      UPDATE posts
+      SET 
+        author_id = ${authorId}, 
+        carpoolers = ${carpoolers}, 
+        status = ${status},
+        start_location = ${startLocation},
+        end_location = ${endLocation},
+        ride_service = ${rideService},
+        description = ${description},
+        ride_time = ${rideTimeSQL},
+        post_time = ${currentTimeSQL}
       WHERE id = ${id}
     `;
   } catch (error) {
-    return { message: 'Database Error: Failed to Update Invoice.' };
+    return { message: 'Database Error: Failed to Update Post.' };
   }
   // Revalidate the cache for the invoices page and redirect the user.
-  revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
+  revalidatePath('/dashboard/posts');
+  redirect('/dashboard/posts');
 }
 
 export async function deletePost(id: string) {
