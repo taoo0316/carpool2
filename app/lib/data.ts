@@ -3,7 +3,7 @@ import {
   User,
   Post,
   Comment,
-  LastestPosts,
+  LastestPost,
   PostsTable,
   PostForm,
   UserField,
@@ -15,7 +15,7 @@ import { unstable_noStore as noStore } from 'next/cache';
 export async function fetchLatestPosts() {
   noStore();
   try {
-    const data = await sql<LastestPosts>`
+    const data = await sql<LastestPost>`
       SELECT 
         users.name, 
         posts.start_location, 
@@ -26,7 +26,7 @@ export async function fetchLatestPosts() {
         posts.status
       FROM posts
       JOIN users ON posts.author_id = users.id
-      ORDER BY posts.date DESC
+      ORDER BY posts.post_time DESC
       LIMIT 5`;
 
     return data.rows;
@@ -42,8 +42,8 @@ export async function fetchCardData() {
     const userCountPromise = sql`SELECT COUNT(*) FROM users`;
     const postCountPromise = sql`SELECT COUNT(*) FROM posts`;
     const postStatusPromise = sql`SELECT
-         COUNT(CASE WHEN status = 'open') AS "open",
-         COUNT(CASE WHEN status = 'closed') AS "closed"
+         SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) AS open,
+         SUM(CASE WHEN status = 'closed' THEN 1 ELSE 0 END) AS closed
          FROM posts`;
 
     const data = await Promise.all([
@@ -52,10 +52,10 @@ export async function fetchCardData() {
       postStatusPromise,
     ]);
 
-    const numberOfUsers = Number(data[0].rows[0].count ?? '0');
-    const numberOfPosts = Number(data[1].rows[0].count ?? '0');
-    const totalOpenPosts = formatCurrency(data[2].rows[0].paid ?? '0');
-    const totalClosedPosts = formatCurrency(data[2].rows[0].pending ?? '0');
+    const numberOfUsers = Number(data[0].rows[0].count ?? 0);
+    const numberOfPosts = Number(data[1].rows[0].count ?? 0);
+    const totalOpenPosts = Number(data[2].rows[0].open ?? 0);
+    const totalClosedPosts = Number(data[2].rows[0].closed ?? 0);
 
     return {
       numberOfUsers,

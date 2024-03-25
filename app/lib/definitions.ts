@@ -18,7 +18,7 @@ export type Post = {
   status: 'open' | 'closed';
 };
 
-export type LastestPosts = {
+export type LastestPost = {
   id: string;
   author_id: string;
   start_location: string;

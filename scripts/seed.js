@@ -52,22 +52,22 @@ async function seedPosts(client) {
     // Create the "posts" table if it doesn't exist
     const createTable = await client.sql`
     CREATE TABLE IF NOT EXISTS posts (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    author_id UUID NOT NULL,
-    carpoolers INT NOT NULL,
-    status VARCHAR(255) NOT NULL,
-    ride_service VARCHAR(255) NOT NULL,
-    ride_time DATETIME NOT NULL,
-    post_time DATETIME NOT NULL,
-    description STRING,
-    start_location: STRING NOT NULL,
-    end_location: STRING NOT NULL,
-  );
-`;
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      author_id UUID NOT NULL,
+      carpoolers INT NOT NULL,
+      status TEXT NOT NULL,
+      ride_service TEXT NOT NULL,
+      ride_time TIMESTAMP NOT NULL,
+      post_time TIMESTAMP NOT NULL,
+      description TEXT,
+      start_location TEXT NOT NULL,
+      end_location TEXT NOT NULL
+    );
+    `;
 
     console.log(`Created "posts" table`);
 
-    // Insert data into the "invoices" table
+    // Insert data into the "posts" table
     const insertedPosts = await Promise.all(
       posts.map(
         (post) => client.sql`
@@ -92,7 +92,7 @@ async function seedPosts(client) {
           ${post.carpoolers},
           ${post.status})
         ON CONFLICT (id) DO NOTHING;
-      `,
+      `
       ),
     );
 
@@ -108,58 +108,11 @@ async function seedPosts(client) {
   }
 }
 
-async function seedComments(client) {
-  try {
-    // Create the "comments" table if it doesn't exist
-    const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS comments (
-        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        post_id UUID NOT NULL,
-        author_id UUID NOT NULL,
-        content STRING,
-        comment_time DATETIME
-      );
-    `;
-
-    console.log(`Created "comments" table`);
-
-    // Insert data into the "comments" table
-    const insertedComments = await Promise.all(
-      comments.map(
-        (comment) => client.sql`
-        INSERT INTO comments (
-          post_id,
-          author_id,
-          content,
-          comment_time,
-        VALUES (
-          ${comment.post_id}, 
-          ${comment.author_id}, 
-          ${comment.content}, 
-          ${comment.comment_time})
-        ON CONFLICT (id) DO NOTHING;
-      `,
-      ),
-    );
-
-    console.log(`Seeded ${insertedComments.length} comments`);
-
-    return {
-      createTable,
-      revenue: insertedComments,
-    };
-  } catch (error) {
-    console.error('Error seeding comments:', error);
-    throw error;
-  }
-}
-
 async function main() {
   const client = await db.connect();
 
   await seedUsers(client);
   await seedPosts(client);
-  await seedComments(client);
 
   await client.end();
 }
