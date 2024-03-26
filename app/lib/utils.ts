@@ -89,3 +89,9 @@ export const findNearestCarpoolLocations = (userLocation: { lat: number, lon: nu
   return sortedLocations;
 };
 
+export const calculateEstimatedTravelTime = (distance: number, averageSpeed: number) => {
+  const hours = distance / averageSpeed;
+  const minutes = hours * 60;
+  return minutes;
+};
+
