@@ -27,7 +27,7 @@ TODOs:
  ⁃ Make sure all input fields are formatted (create post, edit post)
  ⁃ Fix the fallback skeletons to match with the page layout
 
-Stretch goals (If ur done with ur tasks and have time to spare):
+- Stretch goals (If ur done with ur tasks and have time to spare):
  ⁃ Allow user’s profile editing
  ⁃ Implement reply to comment (tag OG commenter’s name to the front)
  ⁃ Implement notification box & Send notifications when a relevant post have been edited/new comments
