@@ -24,7 +24,6 @@ export default async function CardWrapper() {
   return (
     <>
       {/* NOTE: comment in this code when you get to this point in the course */}
-
       <Card title="Closed" value={totalClosedPosts} type="closed" />
       <Card title="Open" value={totalOpenPosts} type="open" />
       <Card title="Total Posts" value={numberOfPosts} type="posts" />
@@ -33,6 +32,7 @@ export default async function CardWrapper() {
         value={numberOfUsers}
         type="users"
       />
+      <PageDescription />
     </>
   );
 }
@@ -60,6 +60,14 @@ export function Card({
       >
         {value}
       </p>
+    </div>
+  );
+}
+
+function PageDescription() {
+  return (
+    <div className="mt-8 text-center text-gray-500">
+      <p className="whitespace-nowrap">This dashboard above provides an overview of user and post statistics. You can also find the latest rideshare posts below.</p>
     </div>
   );
 }
