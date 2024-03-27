@@ -1,3 +1,15 @@
+To run the application, first clone the repository to your local machine with the .env environment file. Then run the command 
+
+```
+npm run dev
+```
+
+To log in, you may use the default credentials:
+```
+Email: user@nextmail.com
+Password: 123456
+```
+
 DONE:
 - User sign in, sign out, sign up
 - Dashboard page (Showing total counts and latest posts)
