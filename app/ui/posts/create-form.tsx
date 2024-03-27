@@ -61,7 +61,7 @@ export default function Form({ users }: { users: UserField[] }) {
         {/* Carpooler Number */}
         <div className="mb-4">
           <label htmlFor="carpoolers" className="mb-2 block text-sm font-medium">
-            Choose number of carpoolers
+            Choose the number of people you are looking for
           </label>
           <div className="relative mt-2 rounded-md">
             <div className="relative">
@@ -70,7 +70,7 @@ export default function Form({ users }: { users: UserField[] }) {
                 name="carpoolers"
                 type="number"
                 step="1"
-                placeholder="Enter number of carpoolers"
+                placeholder="Enter the number of people you are looking for"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
                 aria-describedby="carpooler-error"
               />
@@ -207,7 +207,7 @@ export default function Form({ users }: { users: UserField[] }) {
           {/* Ride Service Dropdown */}
           <div className="mb-4">
             <label htmlFor="rideService" className="mb-2 block text-sm font-medium">
-              Choose Ride Service
+              Choose ride service
             </label>
             <div className="relative">
               <select
@@ -243,7 +243,7 @@ export default function Form({ users }: { users: UserField[] }) {
           {/* Ride Time Input */}
           <div className="mb-4">
             <label htmlFor="rideTime" className="mb-2 block text-sm font-medium">
-              Choose Ride Time
+              Choose ride starting time
             </label>
             <input
               id="rideTime"
@@ -268,7 +268,7 @@ export default function Form({ users }: { users: UserField[] }) {
           {/* Optional description */}
           <div className="mb-4">
             <label htmlFor="startLocation" className="mb-2 block text-sm font-medium">
-              Description
+              Description (e.g. price range, smoking policy etc.)
             </label>
             <div className="relative mt-2 rounded-md">
               <div className="relative">
