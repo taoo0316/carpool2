@@ -20,7 +20,6 @@ export default async function Page({
     page?: string;
   };
 }) {
-
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
   const totalPages = await fetchPostsPages(query);
@@ -34,6 +33,7 @@ export default async function Page({
         <Search placeholder="Search posts..." />
         <CreatePost />
       </div>
+      <p className="mt-4 text-gray-600">This page displays a list of rideshare posts. You can search for specific posts using the search bar above. You may also create posts by clicking on the plus sign.</p>
        <Suspense key={query + currentPage} fallback={<PostsTableSkeleton />}>
         <Table query={query} currentPage={currentPage} />
       </Suspense>
