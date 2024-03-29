@@ -14,11 +14,10 @@ DONE:
 - User sign in, sign out, sign up
 - Dashboard page (Showing total counts and latest posts)
 - Post table & Text search
-- Create post
+- Create & Edit post
 
 TODOs:
 - Post-related actions:
- ⁃ Fix bug in route to edit-post (when clicking edit, ID shown as “undefined” and returns 404 instead of the edit form)
  ⁃ Implement “dashboard/post/id”
  ⁃ For the page for each post, show the basic data and comments 
  ⁃ Seed some comments on the db
