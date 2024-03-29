@@ -1,4 +1,4 @@
-import EditPostForm from '@/app/ui/posts/edit-form';
+import Form from '@/app/ui/posts/edit-form';
 import Breadcrumbs from '@/app/ui/posts/breadcrumbs';
 import { fetchUsers, fetchPostById } from '@/app/lib/data';
 import { UserField, PostForm } from '@/app/lib/definitions';
@@ -28,7 +28,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             },
             ]}
         />
-        <EditPostForm post={post!} users={users} />
+        <Form post={post} users={users} />
         </main>
     );
 }

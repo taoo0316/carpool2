@@ -17,6 +17,7 @@ export async function fetchLatestPosts() {
   try {
     const data = await sql<LastestPost>`
       SELECT 
+        posts.id,
         users.name, 
         posts.start_location, 
         posts.end_location, 
@@ -77,6 +78,7 @@ export async function fetchFilteredPosts( query: string, currentPage: number,) {
   try {
     const posts = await sql<PostsTable>`
       SELECT
+        posts.id,
         users.name, 
         posts.start_location, 
         posts.end_location, 

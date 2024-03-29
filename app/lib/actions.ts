@@ -120,7 +120,7 @@ export async function createPost(prevState: State, formData: FormData) {
 }
 
 // Use Zod to update the expected types
-const UpdatePost = PostSchema.omit({ id: true, date: true });
+const UpdatePost = PostSchema.omit({ id: true, postTime: true });
  
 // Update post
  
@@ -132,7 +132,7 @@ export async function updatePost(
 
   // Validate form fields using Zod
   const validatedFields = UpdatePost.safeParse({
-    authorId: formData.get('customerId'),
+    authorId: formData.get('authorId'),
     carpoolers: formData.get('carpoolers'),
     status: formData.get('status'),
     startLocation: formData.get('startLocation'),
