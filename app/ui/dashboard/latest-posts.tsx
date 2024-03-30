@@ -3,6 +3,8 @@ import clsx from 'clsx';
 import { lusitana } from '@/app/ui/fonts';
 import { LastestPost } from '@/app/lib/definitions';
 import { fetchLatestPosts } from '@/app/lib/data';
+import { formatTimeForDisplay } from '@/app/lib/utils';
+import Link from 'next/link';
 
 export default async function LastestPosts() {
   const latestPosts: LastestPost[] = await fetchLatestPosts();
@@ -17,9 +19,10 @@ export default async function LastestPosts() {
           {latestPosts.map((post, i) => {
         
             // Check if ride_time is a Date object and format it, otherwise use it as a string
-            let rideTimeFormatted = post.ride_time.toString().split(':00 GMT')[0];
+            let rideTimeFormatted = formatTimeForDisplay(post.ride_time.toString());
 
             return (
+              <Link href={`/dashboard/posts/${post.id}`} key={post.id} className="mb-2 w-full">
               <div
                 key={post.id}
                 className={clsx(
@@ -42,6 +45,7 @@ export default async function LastestPosts() {
                   {rideTimeFormatted}
                 </p>
               </div>
+              </Link>
             );
           })}
         </div>

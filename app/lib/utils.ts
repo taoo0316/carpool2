@@ -18,6 +18,11 @@ export const formatSQLTimeForInput = (
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
   
+export const formatTimeForDisplay = (
+  timestamp: string
+) => {
+  return timestamp.split(/:\d{2} G/)[0];
+};
 
 export const formatDateToLocal = (
   dateStr: string,
