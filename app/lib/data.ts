@@ -7,7 +7,8 @@ import {
   PostsTable,
   PostForm,
   UserField,
-  UsersTable
+  UsersTable,
+  CurrentPost
 } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
@@ -145,6 +146,38 @@ export async function fetchPostById(id: string) {
         posts.carpoolers,
         posts.status
       FROM posts
+      WHERE posts.id = ${id};
+    `;
+
+    const post = data.rows.map((post) => ({
+      ...post
+    }));
+
+    return post[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+  }
+}
+
+export async function fetchCurrentPost(id: string) {
+  noStore();
+  try {
+    const data = await sql<CurrentPost>`
+      SELECT 
+        posts.id,
+        posts.author_id,
+        users.name, 
+        users.email,
+        posts.start_location, 
+        posts.end_location, 
+        posts.ride_time, 
+        posts.post_time,
+        posts.description,
+        posts.ride_service, 
+        posts.carpoolers, 
+        posts.status
+      FROM posts
+      JOIN users ON posts.author_id = users.id
       WHERE posts.id = ${id};
     `;
 

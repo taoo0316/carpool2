@@ -31,6 +31,21 @@ export type LastestPost = {
   status: 'open' | 'closed';
 };
 
+export type CurrentPost = {
+  id: string;
+  author_id: string;
+  name: string;
+  email: string;
+  start_location: string;
+  end_location: string;
+  ride_time: string;
+  post_time: string;
+  ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
+  description: string;
+  carpoolers: number;
+  status: 'open' | 'closed';
+};
+
 export type PostsTable = {
   id: string;
   author_id: string;

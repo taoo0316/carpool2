@@ -32,7 +32,6 @@ export default async function CardWrapper() {
         value={numberOfUsers}
         type="users"
       />
-      <PageDescription />
     </>
   );
 }
