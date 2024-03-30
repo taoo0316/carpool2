@@ -36,7 +36,7 @@ export default function UsersPage({
       <h1 className={`${lusitana.className} text-2xl`}>Profile</h1>
     </div>
     <div style={{ marginBottom: '30px' }}></div>
-    <p className="mt-4 text-gray-600">This page displays the user profile, which includes the user&apos;s information, posts and liked/followed posts.</p>
+    <p className="mt-4 text-gray-600">This page displays the user profile, which includes the user's information, posts and liked/followed posts.</p>
     <div style={{ marginBottom: '50px' }}></div>
     <div style={styles.container}>
       <div style={styles.profileInfo}>
