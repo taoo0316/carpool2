@@ -15,6 +15,7 @@ DONE:
 - Dashboard page (Showing total counts and latest posts)
 - Post table & Text search
 - Create & Edit post
+- Profile page
 
 TODOs:
 - Post-related actions:
@@ -27,7 +28,6 @@ TODOs:
 - Authorization for authors vs onlookers:
  ⁃ When creating/updating a new post, instead of selecting an author, the logged in user ID is already keyed in
  ⁃ Authors can edit post, onlookers can heart/follow a post. This will show up on their profile tab as “Following”
- ⁃ Implement “dashboard/profile” to show the user’s profile. This includes their name, email, posts they authored and posts they have hearted/followed. 
 
 - Map search:
  ⁃ Instead of searching by text (current version), allows searching by Google Map and retrieve results via ggl map API
