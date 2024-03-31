@@ -20,13 +20,14 @@ export default function UsersPage({
     email: "zwt2000sg@outlook.com",
     // Dummy posts authored by the user
     postsAuthored: [
-      { id: 1, title: "Post 1", content: "We are going to NTU:)" },
-      { id: 2, title: "Post 2", content: "Let us hop on a supper ride!" },
+      { id: 1, title: "Zhu Wentao", content: "We are going to NTU:)" },
+      { id: 2, title: "Zhu Wentao", content: "Let us hop on a supper ride!" },
     ],
     // Dummy posts hearted/followed by the user
     postsHearted: [
-      { id: 3, title: "Post 1", content: "Sending off a friend to Changi!" },
-      { id: 4, title: "Post 2", content: "Who wants to go to Sentosa during recess week?" },
+      { id: 3, title: "Delba de Oliveira", content: "Sending off a friend to Changi!" },
+      { id: 4, title: "Steph Dietz", content: "Who wants to go to Sentosa during recess week?" },
+      { id: 5, title: "Hector Simpson", content: 'I love this app!'}
     ]
   };
 
@@ -72,9 +73,9 @@ export default function UsersPage({
 
 const styles = {
   container: {
-    maxWidth: '800px',
+    maxWidth: '1500px',
     margin: '0 auto',
-    padding: '20px',
+    padding: '10px',
     backgroundColor: '#f9f9f9',
     borderRadius: '8px',
     boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
