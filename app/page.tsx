@@ -5,7 +5,7 @@ import Link from 'next/link';
 export default function Page() {
   return (
     <main className="flex min-h-screen flex-col p-6">
-      <div className="flex h-20 shrink-0 items-end rounded-lg bg-green-400 p-4 md:h-52">
+      <div className="flex h-20 shrink-0 items-end rounded-lg bg-green-500 p-4 md:h-52">
         <CarpoolLogo />
       </div>
       <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
@@ -20,13 +20,13 @@ export default function Page() {
           <div className="flex"> {/* This container will place its children on the same line */}
             <Link
               href="/signup"
-              className="mr-4 flex items-center gap-5 self-start rounded-lg bg-green-400 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
+              className="mr-4 flex items-center gap-5 self-start rounded-lg bg-green-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-green-700 md:text-base"
             >
               <span>Sign up</span>
             </Link>
             <Link
               href="/login"
-              className="flex items-center gap-5 self-start rounded-lg bg-green-400 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
+              className="flex items-center gap-5 self-start rounded-lg bg-green-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-green-700 md:text-base"
             >
               <span>Log in</span>
             </Link>

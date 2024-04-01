@@ -1,11 +1,38 @@
 const { db } = require('@vercel/postgres');
 const {
-  invoices,
-  customers,
-  revenue,
   users,
+  posts,
 } = require('../app/lib/placeholder-data.js');
 const bcrypt = require('bcrypt');
+const axios = require('axios');
+
+async function geocodeAddress(address) {
+  try {
+    const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+      params: {
+        address: address,
+        key: 'AIzaSyAK01h9k7fI3BflEgwN169OX6oWptyqSc0'
+      }
+    });
+
+    if (response.data.status === 'OK') {
+      const location = response.data.results[0].geometry.location;
+      return {
+        latitude: location.lat,
+        longitude: location.lng
+      };
+    } else {
+      // Handle the case where the address is not found or API limits are exceeded
+      console.error(`Error processing: ${address}`);
+      console.error('Geocoding failed: ' + response.data.status);
+      return null;
+    }
+  } catch (error) {
+    // Handle network errors
+    console.error('Error during geocoding: ', error);
+    return null;
+  }
+};
 
 async function seedUsers(client) {
   try {
@@ -46,127 +73,82 @@ async function seedUsers(client) {
   }
 }
 
-async function seedInvoices(client) {
+async function seedPosts(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
-    // Create the "invoices" table if it doesn't exist
-    const createTable = await client.sql`
-    CREATE TABLE IF NOT EXISTS invoices (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    customer_id UUID NOT NULL,
-    amount INT NOT NULL,
-    status VARCHAR(255) NOT NULL,
-    date DATE NOT NULL
-  );
-`;
-
-    console.log(`Created "invoices" table`);
-
-    // Insert data into the "invoices" table
-    const insertedInvoices = await Promise.all(
-      invoices.map(
-        (invoice) => client.sql`
-        INSERT INTO invoices (customer_id, amount, status, date)
-        VALUES (${invoice.customer_id}, ${invoice.amount}, ${invoice.status}, ${invoice.date})
-        ON CONFLICT (id) DO NOTHING;
-      `,
-      ),
-    );
-
-    console.log(`Seeded ${insertedInvoices.length} invoices`);
-
-    return {
-      createTable,
-      invoices: insertedInvoices,
-    };
-  } catch (error) {
-    console.error('Error seeding invoices:', error);
-    throw error;
-  }
-}
-
-async function seedCustomers(client) {
-  try {
-    await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
-
-    // Create the "customers" table if it doesn't exist
-    const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS customers (
+    // Create the "posts" table with modifications for location using POINT type
+    await client.sql`
+      CREATE TABLE IF NOT EXISTS posts (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        image_url VARCHAR(255) NOT NULL
+        author_id UUID NOT NULL,
+        carpoolers INT NOT NULL,
+        status TEXT NOT NULL,
+        ride_service TEXT NOT NULL,
+        ride_time TIMESTAMP NOT NULL,
+        post_time TIMESTAMP NOT NULL,
+        description TEXT,
+        start_location POINT NOT NULL,
+        end_location POINT NOT NULL
       );
     `;
 
-    console.log(`Created "customers" table`);
+    console.log(`Created "posts" table`);
 
-    // Insert data into the "customers" table
-    const insertedCustomers = await Promise.all(
-      customers.map(
-        (customer) => client.sql`
-        INSERT INTO customers (id, name, email, image_url)
-        VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url})
+    // Insert data into the "posts" table
+    const insertedPostsPromises = posts.map(async (post) => {
+      // Geocode start and end locations for each post
+      const startGeoLocation = await geocodeAddress(post.start_location);
+      const endGeoLocation = await geocodeAddress(post.end_location);
+
+      if (!startGeoLocation || !endGeoLocation) {
+        throw new Error('Geocoding failed for one or more addresses.');
+      }
+
+      return client.sql`
+        INSERT INTO posts (
+          author_id,
+          start_location,
+          end_location,
+          ride_time,
+          post_time,
+          ride_service,
+          description,
+          carpoolers,
+          status)
+        VALUES (
+          ${post.author_id}, 
+          point(${startGeoLocation.latitude}, ${startGeoLocation.longitude}), 
+          point(${endGeoLocation.latitude}, ${endGeoLocation.longitude}), 
+          ${post.ride_time},
+          ${post.post_time},
+          ${post.ride_service},   
+          ${post.description},
+          ${post.carpoolers},
+          ${post.status})
         ON CONFLICT (id) DO NOTHING;
-      `,
-      ),
-    );
+      `;
+    });
 
-    console.log(`Seeded ${insertedCustomers.length} customers`);
+    const insertedPosts = await Promise.all(insertedPostsPromises);
+    console.log(`Seeded ${insertedPosts.length} posts`);
 
     return {
-      createTable,
-      customers: insertedCustomers,
+      createTable: true,
+      posts: insertedPosts,
     };
   } catch (error) {
-    console.error('Error seeding customers:', error);
+    console.error('Error seeding posts:', error);
     throw error;
   }
 }
 
-async function seedRevenue(client) {
-  try {
-    // Create the "revenue" table if it doesn't exist
-    const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS revenue (
-        month VARCHAR(4) NOT NULL UNIQUE,
-        revenue INT NOT NULL
-      );
-    `;
-
-    console.log(`Created "revenue" table`);
-
-    // Insert data into the "revenue" table
-    const insertedRevenue = await Promise.all(
-      revenue.map(
-        (rev) => client.sql`
-        INSERT INTO revenue (month, revenue)
-        VALUES (${rev.month}, ${rev.revenue})
-        ON CONFLICT (month) DO NOTHING;
-      `,
-      ),
-    );
-
-    console.log(`Seeded ${insertedRevenue.length} revenue`);
-
-    return {
-      createTable,
-      revenue: insertedRevenue,
-    };
-  } catch (error) {
-    console.error('Error seeding revenue:', error);
-    throw error;
-  }
-}
 
 async function main() {
   const client = await db.connect();
 
   await seedUsers(client);
-  await seedCustomers(client);
-  await seedInvoices(client);
-  await seedRevenue(client);
+  await seedPosts(client);
 
   await client.end();
 }

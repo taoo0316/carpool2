@@ -1,10 +1,30 @@
-import { Revenue } from './definitions';
+const axios = require('axios');
+const GOOGLE_API_KEY = 'AIzaSyAK01h9k7fI3BflEgwN169OX6oWptyqSc0';
 
 export const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {
     style: 'currency',
     currency: 'USD',
   });
+};
+
+export const formatSQLTimeForInput = (
+  sqlTimestamp: string
+) => {
+  const date = new Date(sqlTimestamp);
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+  
+export const formatTimeForDisplay = (
+  timestamp: string
+) => {
+  return timestamp.split(/:\d{2} G/)[0];
 };
 
 export const formatDateToLocal = (
@@ -19,20 +39,6 @@ export const formatDateToLocal = (
   };
   const formatter = new Intl.DateTimeFormat(locale, options);
   return formatter.format(date);
-};
-
-export const generateYAxis = (revenue: Revenue[]) => {
-  // Calculate what labels we need to display on the y-axis
-  // based on highest record and in 1000s
-  const yAxisLabels = [];
-  const highestRecord = Math.max(...revenue.map((month) => month.revenue));
-  const topLabel = Math.ceil(highestRecord / 1000) * 1000;
-
-  for (let i = topLabel; i >= 0; i -= 1000) {
-    yAxisLabels.push(`$${i / 1000}K`);
-  }
-
-  return { yAxisLabels, topLabel };
 };
 
 export const generatePagination = (currentPage: number, totalPages: number) => {
@@ -67,3 +73,84 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     totalPages,
   ];
 };
+
+export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c; // Distance in km
+  return distance;
+};
+
+export const findNearestCarpoolLocations = (userLocation: { lat: number, lon: number }, carpoolLocations: { lat: number, lon: number }[]) => {
+  const sortedLocations = carpoolLocations.sort((loc1, loc2) => {
+    const distance1 = calculateDistance(userLocation.lat, userLocation.lon, loc1.lat, loc1.lon);
+    const distance2 = calculateDistance(userLocation.lat, userLocation.lon, loc2.lat, loc2.lon);
+    return distance1 - distance2;
+  });
+  return sortedLocations;
+};
+
+export const calculateEstimatedTravelTime = (distance: number, averageSpeed: number) => {
+  const hours = distance / averageSpeed;
+  const minutes = hours * 60;
+  return minutes;
+}; 
+
+export async function geocodeAddress(address : string) {
+  try {
+    const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+      params: {
+        address: address,
+        key: 'AIzaSyAK01h9k7fI3BflEgwN169OX6oWptyqSc0'
+      }
+    });
+
+    if (response.data.status === 'OK') {
+      const location = response.data.results[0].geometry.location;
+      return {
+        latitude: location.lat,
+        longitude: location.lng
+      };
+    } else {
+      // Handle the case where the address is not found or API limits are exceeded
+      console.error('Geocoding failed: ' + response.data.status);
+      return null;
+    }
+  } catch (error) {
+    // Handle network errors
+    console.error('Error during geocoding: ', error);
+    return null;
+  }
+};
+
+export async function reverseGeocode(latitude: number, longitude: number) {
+
+  if (isNaN(latitude) || isNaN(longitude)) {
+    console.error('Invalid latitude or longitude extracted from POINT:', latitude, longitude);
+    return null;
+  }
+
+  try {
+    const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+      params: {
+        latlng: `${latitude},${longitude}`,
+        key: 'AIzaSyAK01h9k7fI3BflEgwN169OX6oWptyqSc0'
+      }
+    });
+
+    if (response.data.status === 'OK') {
+      return response.data.results[0].formatted_address;
+    } else {
+      console.error('Reverse Geocoding failed:', response.data.status);
+      return "Address Not Found";
+    }
+  } catch (error) {
+    console.error('Error during reverse geocoding:', error);
+    return null;
+  }
+}

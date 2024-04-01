@@ -8,30 +8,29 @@ import { lusitana } from '@/app/ui/fonts';
 import { fetchCardData } from '@/app/lib/data';
 
 const iconMap = {
-  collected: BanknotesIcon,
-  customers: UserGroupIcon,
-  pending: ClockIcon,
-  invoices: InboxIcon,
+  closed: ClockIcon,
+  users: UserGroupIcon,
+  open: ClockIcon,
+  posts: InboxIcon,
 };
 
 export default async function CardWrapper() {
   const {
-    totalPaidInvoices,
-    totalPendingInvoices,
-    numberOfInvoices,
-    numberOfCustomers
+    numberOfUsers,
+    numberOfPosts,
+    totalOpenPosts,
+    totalClosedPosts
   } = await fetchCardData();
   return (
     <>
       {/* NOTE: comment in this code when you get to this point in the course */}
-
-      <Card title="Collected" value={totalPaidInvoices} type="collected" />
-      <Card title="Pending" value={totalPendingInvoices} type="pending" />
-      <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />
+      <Card title="Closed" value={totalClosedPosts} type="closed" />
+      <Card title="Open" value={totalOpenPosts} type="open" />
+      <Card title="Total Posts" value={numberOfPosts} type="posts" />
       <Card
-        title="Total Customers"
-        value={numberOfCustomers}
-        type="customers"
+        title="Total Users"
+        value={numberOfUsers}
+        type="users"
       />
     </>
   );
@@ -44,7 +43,7 @@ export function Card({
 }: {
   title: string;
   value: number | string;
-  type: 'invoices' | 'customers' | 'pending' | 'collected';
+  type: 'posts' | 'users' | 'open' | 'closed';
 }) {
   const Icon = iconMap[type];
 
@@ -60,6 +59,14 @@ export function Card({
       >
         {value}
       </p>
+    </div>
+  );
+}
+
+function PageDescription() {
+  return (
+    <div className="mt-8 text-center text-gray-500">
+      <p className="whitespace-nowrap">This dashboard above provides an overview of user and post statistics. You can also find the latest rideshare posts below.</p>
     </div>
   );
 }

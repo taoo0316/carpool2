@@ -4,10 +4,10 @@ import { Metadata } from 'next';
  
 export const metadata: Metadata = {
   title: {
-    template: '%s | Acme Dashboard | @lllariogonzalez',
-    default: 'Acme Dashboard by @lllariogonzalez',
+    template: '%s | Carpool',
+    default: 'Carpool',
   },
-  description: 'The official Next.js Course Dashboard, built with App Router.',
+  description: 'Sharing is CARing! Look no further to share your ride and care for your wallet!',
   metadataBase: new URL('https://nextjs-dashboard-acme.vercel.app'),
   authors: [{name: 'Mario Gonzalez', url:'https://www.linkedin.com/in/lllariogonzalez'}],
   keywords: ['Next.js 14', 'Acme', 'Dashboard', 'nextjs.org/learn', 'Server Actions'],

@@ -5,126 +5,227 @@ import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
+import bcrypt from 'bcrypt';
+import { geocodeAddress } from './utils';
  
-const InvoiceSchema = z.object({
+const PostSchema = z.object({
   id: z.string(),
-  customerId: z.string({
-    invalid_type_error: 'Please select a customer.',
+  authorId: z.string({
+    invalid_type_error: 'Please select an author.',
   }),
-  amount: z.coerce
+  startLocation: z.string({
+    invalid_type_error: 'Please select a start location.',
+  }),
+  endLocation: z.string({
+    invalid_type_error: 'Please select an end location.',
+  }),
+  status: z.enum(['open', 'closed'], {
+    invalid_type_error: 'Please select a post status.',
+  }),
+  rideService: z.enum(['Grab', 'Gojek', 'Ryde', 'ComfortDelGro', 'TADA'], {
+    invalid_type_error: 'Please select a ride service.',
+  }),
+  rideTime: z.string(),
+  postTime: z.string(),
+  description: z.string(),
+  carpoolers: z.coerce
     .number()
-    .gt(0, { message: 'Please enter an amount greater than $0.' }),
-  status: z.enum(['pending', 'paid'], {
-    invalid_type_error: 'Please select an invoice status.',
-  }),
-  date: z.string(),
+    .gt(0, { message: 'Please enter a number of carpoolers greater than 0.' }),
 });
  
-const CreateInvoice = InvoiceSchema.omit({ id: true, date: true });
+const CreatePost = PostSchema.omit({ id: true, postTime: true });
 
 export type State = {
   errors?: {
-    customerId?: string[];
-    amount?: string[];
+    authorId?: string[];
+    startLocation?: string[];
+    endLocation?: string[];
     status?: string[];
+    rideService?: string[];
+    rideTime?: string[];
+    carpoolers?: string[];
   };
   message?: string | null;
 };
  
-export async function createInvoice(prevState: State, formData: FormData) {
+export async function createPost(prevState: State, formData: FormData) {
     
     // Validate form fields using Zod
-    const validatedFields = CreateInvoice.safeParse({
-      customerId: formData.get('customerId'),
-      amount: formData.get('amount'),
+    const validatedFields = CreatePost.safeParse({
+      authorId: formData.get('authorId'),
+      carpoolers: formData.get('carpoolers'),
       status: formData.get('status'),
+      startLocation: formData.get('startLocation'),
+      endLocation: formData.get('endLocation'),
+      rideService: formData.get('rideService'),
+      rideTime: formData.get('rideTime'),
+      description: formData.get('description')
     });
+
+    console.log(validatedFields);
 
     // If form validation fails, return errors early. Otherwise, continue.
     if (!validatedFields.success) {
       return {
         errors: validatedFields.error.flatten().fieldErrors,
-        message: 'Missing Fields. Failed to Create Invoice.',
+        message: 'Missing Fields. Failed to Create Post.',
       };
     }
 
     // Prepare data for insertion into the database
-    const { customerId, amount, status } = validatedFields.data;
-    const amountInCents = amount * 100;
-    const date = new Date().toISOString().split('T')[0];
+    const { 
+      authorId, 
+      carpoolers, 
+      status, 
+      startLocation, 
+      endLocation, 
+      rideService, 
+      rideTime,
+      description } = validatedFields.data;
 
-    // Test it out:
-    // console.log();
+    const rideTimeSQL = rideTime.replace('T', ' ') + ':00';
+    const currentTimeSQL = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    
+    const startGeoLocation = await geocodeAddress(startLocation);
+    const endGeoLocation = await geocodeAddress(endLocation);
+
+    if (!startGeoLocation || !endGeoLocation) {
+      return {
+        message: 'Geocoding Error: Failed to resolve one or more addresses.',
+      };
+    }
+
+    // Format the geolocation data for SQL POINT type
+    const formattedStartLocation = `point(${startGeoLocation.latitude}, ${startGeoLocation.longitude})`;
+    const formattedEndLocation = `point(${endGeoLocation.latitude}, ${endGeoLocation.longitude})`;
+
     // Insert data into the database
-    try{
+    try {
       await sql`
-        INSERT INTO invoices (customer_id, amount, status, date)
-        VALUES (${customerId}, ${amountInCents}, ${status}, ${date})`;
+        INSERT INTO posts (
+          author_id,
+          start_location,
+          end_location,
+          ride_time,
+          post_time,
+          ride_service,
+          description,
+          carpoolers,
+          status)
+        VALUES (
+          ${authorId}, 
+          ${formattedStartLocation}, 
+          ${formattedEndLocation}, 
+          ${rideTimeSQL},
+          ${currentTimeSQL},
+          ${rideService},
+          ${description},
+          ${carpoolers},
+          ${status})`;
     } catch (error) {
       return {
-        message: 'Database Error: Failed to Create Invoice.',
+        message: 'Database Error: Failed to Create Post.',
       };
     }
   
-    // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath('/dashboard/invoices');
-    redirect('/dashboard/invoices');
+    // Revalidate the cache for the posts page and redirect the user.
+    revalidatePath('/dashboard/posts');
+    redirect('/dashboard/posts');
 }
 
 // Use Zod to update the expected types
-const UpdateInvoice = InvoiceSchema.omit({ id: true, date: true });
+const UpdatePost = PostSchema.omit({ id: true, postTime: true });
  
-// ...
+// Update post
  
-export async function updateInvoice(
+export async function updatePost(
   id: string,
   prevState: State,
   formData: FormData
 ){
 
   // Validate form fields using Zod
-  const validatedFields = UpdateInvoice.safeParse({
-    customerId: formData.get('customerId'),
-    amount: formData.get('amount'),
+  const validatedFields = UpdatePost.safeParse({
+    authorId: formData.get('authorId'),
+    carpoolers: formData.get('carpoolers'),
     status: formData.get('status'),
+    startLocation: formData.get('startLocation'),
+    endLocation: formData.get('endLocation'),
+    rideService: formData.get('rideService'),
+    rideTime: formData.get('rideTime'),
+    description: formData.get('description')
   });
 
   // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Update Invoice.',
+      message: 'Missing Fields. Failed to Update Post.',
     };
   }
 
-  // Prepare data for insertion into the database
-  const { customerId, amount, status } = validatedFields.data;
-  const amountInCents = amount * 100;
+  // Prepare data for update in the database
+  const { 
+    authorId, 
+    carpoolers, 
+    status, 
+    startLocation, 
+    endLocation, 
+    rideService, 
+    rideTime,
+    description } = validatedFields.data;
+
+  const rideTimeSQL = rideTime.replace('T', ' ') + ':00';
+  const currentTimeSQL = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+  const startGeoLocation = await geocodeAddress(startLocation);
+    const endGeoLocation = await geocodeAddress(endLocation);
+
+    if (!startGeoLocation || !endGeoLocation) {
+      return {
+        message: 'Geocoding Error: Failed to resolve one or more addresses.',
+      };
+    }
+
+    // Format the geolocation data for SQL POINT type
+    const formattedStartLocation = `point(${startGeoLocation.latitude}, ${startGeoLocation.longitude})`;
+    const formattedEndLocation = `point(${endGeoLocation.latitude}, ${endGeoLocation.longitude})`;
+
   // Insert data into the database
   try {
     await sql`
-      UPDATE invoices
-      SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+      UPDATE posts
+      SET 
+        author_id = ${authorId}, 
+        carpoolers = ${carpoolers}, 
+        status = ${status},
+        start_location = ${formattedStartLocation},
+        end_location = ${formattedEndLocation},
+        ride_service = ${rideService},
+        description = ${description},
+        ride_time = ${rideTimeSQL},
+        post_time = ${currentTimeSQL}
       WHERE id = ${id}
     `;
   } catch (error) {
-    return { message: 'Database Error: Failed to Update Invoice.' };
+    return { message: 'Database Error: Failed to Update Post.' };
   }
   // Revalidate the cache for the invoices page and redirect the user.
-  revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
+  revalidatePath('/dashboard/posts');
+  redirect('/dashboard/posts');
 }
 
-export async function deleteInvoice(id: string) {
+export async function deletePost(id: string) {
   // throw new Error('Failed to Delete Invoice');
   try {
-    await sql`DELETE FROM invoices WHERE id = ${id}`;
-    revalidatePath('/dashboard/invoices');
+    await sql`DELETE FROM posts WHERE id = ${id}`;
+    revalidatePath('/dashboard/posts');
   } catch (error) {
-    return { message: 'Database Error: Failed to Delete Invoice.' };
+    return { message: 'Database Error: Failed to Delete Post.' };
   }
 }
 
+// Log in user
   
 export async function authenticate(
   prevState: string | undefined,
@@ -138,4 +239,67 @@ export async function authenticate(
     }
     throw error;
   }
+}
+
+// Sign user up
+
+const UserSchema = z.object({
+  id: z.string(),
+  name: z.string({
+    invalid_type_error: 'Please add a name.',
+  }),
+  email: z.string({
+    invalid_type_error: 'Please add an email.',
+  }),
+  password: z.string({
+    invalid_type_error: 'Please add a password.',
+  }),
+});
+ 
+const CreateUser = UserSchema.omit({ id: true });
+
+export type UserState = {
+  errors?: {
+    name?: string[];
+    email?: string[];
+    password?: string[];
+  };
+  message?: string | null;
+};
+ 
+export async function createUser(prevState: UserState, formData: FormData) {
+    
+    // Validate form fields using Zod
+    const validatedUserFields = CreateUser.safeParse({
+      name: formData.get('name'),
+      email: formData.get('email'),
+      password: formData.get('password'),
+    });
+
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedUserFields.success) {
+      return {
+        errors: validatedUserFields.error.flatten().fieldErrors,
+        message: 'Missing Fields. Failed to Create Account.',
+      };
+    }
+
+    // Prepare data for insertion into the database
+    const { name, email, password } = validatedUserFields.data;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert data into the database
+    try {
+      await sql`
+        INSERT INTO users (name, email, password)
+        VALUES (${name}, ${email}, ${hashedPassword})`;
+    } catch (error) {
+      return {
+        message: 'Database Error: Failed to Create Account.',
+      };
+    }
+  
+    // Sign in and redirect the user.
+    redirect('/');
 }

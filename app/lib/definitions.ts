@@ -1,7 +1,3 @@
-// This file contains type definitions for your data.
-// It describes the shape of the data, and what data type each property should accept.
-// For simplicity of teaching, we're manually defining these types.
-// However, these types are generated automatically if you're using an ORM such as Prisma.
 export type User = {
   id: string;
   name: string;
@@ -9,80 +5,114 @@ export type User = {
   password: string;
 };
 
-export type Customer = {
+export type GeoLocation = {
+  latitude: number;
+  longitude: number;
+};
+
+export type Post = {
+  id: string;
+  author_id: string;
+  start_location: GeoLocation;
+  end_location: GeoLocation;
+  ride_time: string;
+  post_time: string;
+  ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
+  description: string;
+  carpoolers: number;
+  status: 'open' | 'closed';
+};
+
+export type LastestPost = {
+  id: string;
+  author_id: string;
+  start_latitude: number;
+  start_longitude: number;
+  end_latitude: number;
+  end_longitude: number;
+  ride_time: string;
+  post_time: string;
+  ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
+  description: string;
+  carpoolers: number;
+  status: 'open' | 'closed';
+};
+
+export type CurrentPost = {
+  id: string;
+  author_id: string;
+  name: string;
+  email: string;
+  start_latitude: number;
+  start_longitude: number;
+  end_latitude: number;
+  end_longitude: number;
+  ride_time: string;
+  post_time: string;
+  ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
+  description: string;
+  carpoolers: number;
+  status: 'open' | 'closed';
+};
+
+export type PostsTable = {
+  id: string;
+  author_id: string;
+  name: string;
+  email: string;
+  start_latitude: number;
+  start_longitude: number;
+  end_latitude: number;
+  end_longitude: number;
+  ride_time: string;
+  post_time: string;
+  ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
+  description: string;
+  carpoolers: number;
+  status: 'open' | 'closed';
+};
+
+export type Comment = {
+  id: string;
+  post_id: string;
+  author_id: string;
+  content: string;
+  time: string;
+};
+
+export type PostForm = {
+  id: string;
+  author_id: string;
+  start_location: GeoLocation;
+  end_location: GeoLocation;
+
+  ride_time: string;
+  post_time: string;
+  ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
+  description: string;
+  carpoolers: number;
+  status: 'open' | 'closed';
+};
+
+export type UserField = {
+  id: string;
+  name: string;
+};
+
+export type UsersTable = {
   id: string;
   name: string;
   email: string;
-  image_url: string;
+  total_posts: number;
+  total_open: number;
+  total_closed: number;
 };
 
-export type Invoice = {
-  id: string;
-  customer_id: string;
-  amount: number;
-  date: string;
-  // In TypeScript, this is called a string union type.
-  // It means that the "status" property can only be one of the two strings: 'pending' or 'paid'.
-  status: 'pending' | 'paid';
-};
-
-export type Revenue = {
-  month: string;
-  revenue: number;
-};
-
-export type LatestInvoice = {
-  id: string;
-  name: string;
-  image_url: string;
-  email: string;
-  amount: string;
-};
-
-// The database returns a number for amount, but we later format it to a string with the formatCurrency function
-export type LatestInvoiceRaw = Omit<LatestInvoice, 'amount'> & {
-  amount: number;
-};
-
-export type InvoicesTable = {
-  id: string;
-  customer_id: string;
-  name: string;
-  email: string;
-  image_url: string;
-  date: string;
-  amount: number;
-  status: 'pending' | 'paid';
-};
-
-export type CustomersTable = {
+export type FormattedUsersTable = {
   id: string;
   name: string;
   email: string;
-  image_url: string;
-  total_invoices: number;
-  total_pending: number;
-  total_paid: number;
-};
-
-export type FormattedCustomersTable = {
-  id: string;
-  name: string;
-  email: string;
-  image_url: string;
-  total_invoices: number;
-  total_pending: string;
-  total_paid: string;
-};
-
-export type CustomerField = {
-  id: string;
-  name: string;
-};
-
-export type InvoiceForm = {
-  id: string;
-  customer_id: string;
-  amount: number;
-  status: 'pending' | 'paid';
+  total_posts: number;
+  total_open: number;
+  total_closed: number;
 };
