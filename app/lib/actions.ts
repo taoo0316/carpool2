@@ -56,6 +56,8 @@ export async function createPost(prevState: State, formData: FormData) {
       status: formData.get('status'),
       startLocation: formData.get('startLocation'),
       endLocation: formData.get('endLocation'),
+      // startLocation: JSON.parse(formData.get('startLocation') as string),
+      // endLocation: JSON.parse(formData.get('endLocation') as string), 
       rideService: formData.get('rideService'),
       rideTime: formData.get('rideTime'),
       description: formData.get('description')
