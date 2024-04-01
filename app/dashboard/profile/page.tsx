@@ -35,7 +35,7 @@ export default function UsersPage({
   return (
     <div className="w-full">
     <div className="flex w-full items-center justify-between">
-      <h1 className={`${lusitana.className} text-2xl`}>Profile</h1>
+      <h1 className={`${lusitana.className} text-2xl pt-5`}>Profile</h1>
     </div>
     <div style={{ marginBottom: '30px' }}></div>
     <p className="mt-4 text-gray-600">This page displays the user profile, which includes the user&apos;s information, posts and liked/followed posts.</p>

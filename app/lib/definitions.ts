@@ -66,7 +66,7 @@ export type Comment = {
   post_id: string;
   author_id: string;
   content: string;
-  comment_time: string;
+  time: string;
 };
 
 export type PostForm = {

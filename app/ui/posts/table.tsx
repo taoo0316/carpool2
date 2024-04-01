@@ -21,7 +21,7 @@ export default async function PostsTable({
 				<div className='rounded-lg bg-gray-100 md:bg-gray-50 p-2 md:pt-0'>
 					<div className='md:hidden'>
 						{posts?.map((post) => (
-							<div className='mb-2 w-full rounded-md bg-white p-4'>
+							<div key={post.id} className='mb-2 w-full rounded-md bg-white p-4'>
 								<div className='flex items-center justify-between pb-2 border-b'>
 									<div className='flex items-center'>
 										<UserCircleIcon className='w-8 mr-2' />
