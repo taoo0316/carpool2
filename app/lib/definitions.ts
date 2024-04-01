@@ -5,6 +5,11 @@ export type User = {
   password: string;
 };
 
+// export type GeoLocation = {
+//   lat: number;
+//   lng: number;
+// };
+
 export type Post = {
   id: string;
   author_id: string;
@@ -23,6 +28,8 @@ export type LastestPost = {
   author_id: string;
   start_location: string;
   end_location: string;
+  // start_location: GeoLocation;
+  // end_location: GeoLocation;
   ride_time: string;
   post_time: string;
   ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
@@ -38,6 +45,8 @@ export type CurrentPost = {
   email: string;
   start_location: string;
   end_location: string;
+  // start_location: GeoLocation;
+  // end_location: GeoLocation;
   ride_time: string;
   post_time: string;
   ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
@@ -53,6 +62,8 @@ export type PostsTable = {
   email: string;
   start_location: string;
   end_location: string;
+  // start_location: GeoLocation;
+  // end_location: GeoLocation;
   ride_time: string;
   post_time: string;
   ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
@@ -74,6 +85,8 @@ export type PostForm = {
   author_id: string;
   start_location: string;
   end_location: string;
+  // start_location: GeoLocation;
+  // end_location: GeoLocation;
   ride_time: string;
   post_time: string;
   ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
