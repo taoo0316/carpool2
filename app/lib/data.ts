@@ -10,7 +10,7 @@ import {
   UsersTable,
   CurrentPost
 } from './definitions';
-import { formatCurrency } from './utils';
+import { formatCurrency, geocodeAddress } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
 
 export async function fetchLatestPosts() {
@@ -20,8 +20,10 @@ export async function fetchLatestPosts() {
       SELECT 
         posts.id,
         users.name, 
-        posts.start_location, 
-        posts.end_location, 
+        split_part(substr(trim(start_location::text, '()'), 1), ',', 1)::float AS start_latitude,
+        split_part(substr(trim(start_location::text, '()'), 1), ',', 2)::float AS start_longitude,
+        split_part(substr(trim(end_location::text, '()'), 1), ',', 1)::float AS end_latitude,
+        split_part(substr(trim(end_location::text, '()'), 1), ',', 2)::float AS end_longitude,
         posts.ride_time, 
         posts.ride_service, 
         posts.carpoolers, 
@@ -72,34 +74,66 @@ export async function fetchCardData() {
 }
 
 const ITEMS_PER_PAGE = 6;
-export async function fetchFilteredPosts( query: string, currentPage: number,) {
+export async function fetchFilteredPosts(query: string, currentPage: number) {
   noStore();
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
-  try {
-    const posts = await sql<PostsTable>`
+  // Convert query to geolocation
+  const searchLocation = await geocodeAddress(query);
+  let postsQuery;
+
+  if (searchLocation) {
+    // If geolocation is found, use the filtered query
+    postsQuery = sql<PostsTable>`
       SELECT
         posts.id,
         users.name, 
-        posts.start_location, 
-        posts.end_location, 
+        split_part(substr(trim(start_location::text, '()'), 1), ',', 1)::float AS start_latitude,
+        split_part(substr(trim(start_location::text, '()'), 1), ',', 2)::float AS start_longitude,
+        split_part(substr(trim(end_location::text, '()'), 1), ',', 1)::float AS end_latitude,
+        split_part(substr(trim(end_location::text, '()'), 1), ',', 2)::float AS end_longitude,
         posts.ride_time, 
         posts.ride_service, 
         posts.carpoolers, 
         posts.status
       FROM posts
       JOIN users ON posts.author_id = users.id
-      WHERE
-        users.name ILIKE ${`%${query}%`} OR
-        posts.start_location ILIKE ${`%${query}%`} OR
-        posts.end_location ILIKE ${`%${query}%`} OR
-        posts.ride_time::text ILIKE ${`%${query}%`} OR
-        posts.ride_service ILIKE ${`%${query}%`} OR
-        posts.status ILIKE ${`%${query}%`}
+      WHERE (
+        earth_distance(
+          ll_to_earth(start_latitude, start_longitude),
+          ll_to_earth(${searchLocation.latitude}, ${searchLocation.longitude})
+        ) < 100 OR
+        earth_distance(
+          ll_to_earth(end_latitude, end_longitude),
+          ll_to_earth(${searchLocation.latitude}, ${searchLocation.longitude})
+        ) < 100
+      )
       ORDER BY posts.post_time DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
+  } else {
+    // If geolocation is not found, return all posts
+    postsQuery = sql<PostsTable>`
+      SELECT
+        posts.id,
+        users.name, 
+        split_part(substr(trim(start_location::text, '()'), 1), ',', 1)::float AS start_latitude,
+        split_part(substr(trim(start_location::text, '()'), 1), ',', 2)::float AS start_longitude,
+        split_part(substr(trim(end_location::text, '()'), 1), ',', 1)::float AS end_latitude,
+        split_part(substr(trim(end_location::text, '()'), 1), ',', 2)::float AS end_longitude,
+        posts.ride_time, 
+        posts.ride_service, 
+        posts.carpoolers, 
+        posts.status
+      FROM posts
+      JOIN users ON posts.author_id = users.id
+      ORDER BY posts.post_time DESC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+  }
 
+  try {
+    const posts = await postsQuery;
     return posts.rows;
   } catch (error) {
     console.error('Database Error:', error);
@@ -109,26 +143,45 @@ export async function fetchFilteredPosts( query: string, currentPage: number,) {
 
 export async function fetchPostsPages(query: string) {
   noStore();
-  try {
-    const count = await sql`SELECT COUNT(*)
-    FROM posts
-    JOIN users ON posts.author_id = users.id
-    WHERE
-      users.name ILIKE ${`%${query}%`} OR
-      posts.start_location ILIKE ${`%${query}%`} OR
-      posts.end_location ILIKE ${`%${query}%`} OR
-      posts.ride_time::text ILIKE ${`%${query}%`} OR
-      posts.ride_service ILIKE ${`%${query}%`} OR
-      posts.status ILIKE ${`%${query}%`}
-    `;
+  let countQuery;
 
-    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+  const searchLocation = await geocodeAddress(query);
+  if (searchLocation) {
+    // If geolocation is found, use the filtered count query
+    countQuery = sql`
+      SELECT COUNT(*)
+      FROM posts
+      JOIN users ON posts.author_id = users.id
+      WHERE (
+        earth_distance(
+          ll_to_earth(
+            (substring(start_location::text from 1 for position(',' in start_location::text)-1))::float, 
+            (substring(start_location::text from position(',' in start_location::text)+1))::float),
+          ll_to_earth(${searchLocation.latitude}, ${searchLocation.longitude})
+        ) < 100 OR
+        earth_distance(
+          ll_to_earth(
+            (substring(end_location::text from 1 for position(',' in end_location::text)-1))::float, 
+            (substring(end_location::text from position(',' in end_location::text)+1))::float),
+          ll_to_earth(${searchLocation.latitude}, ${searchLocation.longitude})
+        ) < 100
+      )
+    `;
+  } else {
+    // If geolocation is not found, return count of all posts
+    countQuery = sql`SELECT COUNT(*) FROM posts`;
+  }
+
+  try {
+    const countResult = await countQuery;
+    const totalPages = Math.ceil(Number(countResult.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch total number of posts.');
   }
 }
+
 
 export async function fetchPostById(id: string) {
   noStore();
@@ -137,8 +190,10 @@ export async function fetchPostById(id: string) {
       SELECT
         posts.id,
         posts.author_id,
-        posts.start_location,
-        posts.end_location,
+        split_part(substr(trim(start_location::text, '()'), 1), ',', 1)::float AS start_latitude,
+        split_part(substr(trim(start_location::text, '()'), 1), ',', 2)::float AS start_longitude,
+        split_part(substr(trim(end_location::text, '()'), 1), ',', 1)::float AS end_latitude,
+        split_part(substr(trim(end_location::text, '()'), 1), ',', 2)::float AS end_longitude,
         posts.ride_time,
         posts.post_time,
         posts.ride_service,
@@ -168,8 +223,10 @@ export async function fetchCurrentPost(id: string) {
         posts.author_id,
         users.name, 
         users.email,
-        posts.start_location, 
-        posts.end_location, 
+        split_part(substr(trim(start_location::text, '()'), 1), ',', 1)::float AS start_latitude,
+        split_part(substr(trim(start_location::text, '()'), 1), ',', 2)::float AS start_longitude,
+        split_part(substr(trim(end_location::text, '()'), 1), ',', 1)::float AS end_latitude,
+        split_part(substr(trim(end_location::text, '()'), 1), ',', 2)::float AS end_longitude,
         posts.ride_time, 
         posts.post_time,
         posts.description,

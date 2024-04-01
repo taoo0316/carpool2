@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import bcrypt from 'bcrypt';
+import { geocodeAddress } from './utils';
  
 const PostSchema = z.object({
   id: z.string(),
@@ -56,8 +57,6 @@ export async function createPost(prevState: State, formData: FormData) {
       status: formData.get('status'),
       startLocation: formData.get('startLocation'),
       endLocation: formData.get('endLocation'),
-      // startLocation: JSON.parse(formData.get('startLocation') as string),
-      // endLocation: JSON.parse(formData.get('endLocation') as string), 
       rideService: formData.get('rideService'),
       rideTime: formData.get('rideTime'),
       description: formData.get('description')
@@ -86,6 +85,19 @@ export async function createPost(prevState: State, formData: FormData) {
 
     const rideTimeSQL = rideTime.replace('T', ' ') + ':00';
     const currentTimeSQL = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    
+    const startGeoLocation = await geocodeAddress(startLocation);
+    const endGeoLocation = await geocodeAddress(endLocation);
+
+    if (!startGeoLocation || !endGeoLocation) {
+      return {
+        message: 'Geocoding Error: Failed to resolve one or more addresses.',
+      };
+    }
+
+    // Format the geolocation data for SQL POINT type
+    const formattedStartLocation = `point(${startGeoLocation.latitude}, ${startGeoLocation.longitude})`;
+    const formattedEndLocation = `point(${endGeoLocation.latitude}, ${endGeoLocation.longitude})`;
 
     // Insert data into the database
     try {
@@ -102,8 +114,8 @@ export async function createPost(prevState: State, formData: FormData) {
           status)
         VALUES (
           ${authorId}, 
-          ${startLocation}, 
-          ${endLocation}, 
+          ${formattedStartLocation}, 
+          ${formattedEndLocation}, 
           ${rideTimeSQL},
           ${currentTimeSQL},
           ${rideService},
@@ -116,7 +128,7 @@ export async function createPost(prevState: State, formData: FormData) {
       };
     }
   
-    // Revalidate the cache for the invoices page and redirect the user.
+    // Revalidate the cache for the posts page and redirect the user.
     revalidatePath('/dashboard/posts');
     redirect('/dashboard/posts');
 }
@@ -166,6 +178,19 @@ export async function updatePost(
   const rideTimeSQL = rideTime.replace('T', ' ') + ':00';
   const currentTimeSQL = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
+  const startGeoLocation = await geocodeAddress(startLocation);
+    const endGeoLocation = await geocodeAddress(endLocation);
+
+    if (!startGeoLocation || !endGeoLocation) {
+      return {
+        message: 'Geocoding Error: Failed to resolve one or more addresses.',
+      };
+    }
+
+    // Format the geolocation data for SQL POINT type
+    const formattedStartLocation = `point(${startGeoLocation.latitude}, ${startGeoLocation.longitude})`;
+    const formattedEndLocation = `point(${endGeoLocation.latitude}, ${endGeoLocation.longitude})`;
+
   // Insert data into the database
   try {
     await sql`
@@ -174,8 +199,8 @@ export async function updatePost(
         author_id = ${authorId}, 
         carpoolers = ${carpoolers}, 
         status = ${status},
-        start_location = ${startLocation},
-        end_location = ${endLocation},
+        start_location = ${formattedStartLocation},
+        end_location = ${formattedEndLocation},
         ride_service = ${rideService},
         description = ${description},
         ride_time = ${rideTimeSQL},

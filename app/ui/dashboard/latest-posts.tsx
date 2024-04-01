@@ -5,6 +5,7 @@ import { LastestPost } from '@/app/lib/definitions';
 import { fetchLatestPosts } from '@/app/lib/data';
 import { formatTimeForDisplay } from '@/app/lib/utils';
 import Link from 'next/link';
+import { reverseGeocode } from '@/app/lib/utils';
 
 export default async function LastestPosts() {
   const latestPosts: LastestPost[] = await fetchLatestPosts();
@@ -35,7 +36,7 @@ export default async function LastestPosts() {
                 <div className="flex items-center">
                   <div className="min-w-0">
                     <p className="truncate font-bold text-sm md:text-base">
-                      {post.start_location} &#8594; {post.end_location}
+                      {reverseGeocode(post.start_latitude, post.start_longitude)} &#8594; {reverseGeocode(post.end_latitude, post.end_longitude)}
                     </p>
                   </div>
                 </div>

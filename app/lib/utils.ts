@@ -1,3 +1,6 @@
+const axios = require('axios');
+const GOOGLE_API_KEY = 'AIzaSyAK01h9k7fI3BflEgwN169OX6oWptyqSc0';
+
 export const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {
     style: 'currency',
@@ -96,5 +99,58 @@ export const calculateEstimatedTravelTime = (distance: number, averageSpeed: num
   const hours = distance / averageSpeed;
   const minutes = hours * 60;
   return minutes;
+}; 
+
+export async function geocodeAddress(address : string) {
+  try {
+    const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+      params: {
+        address: address,
+        key: 'AIzaSyAK01h9k7fI3BflEgwN169OX6oWptyqSc0'
+      }
+    });
+
+    if (response.data.status === 'OK') {
+      const location = response.data.results[0].geometry.location;
+      return {
+        latitude: location.lat,
+        longitude: location.lng
+      };
+    } else {
+      // Handle the case where the address is not found or API limits are exceeded
+      console.error('Geocoding failed: ' + response.data.status);
+      return null;
+    }
+  } catch (error) {
+    // Handle network errors
+    console.error('Error during geocoding: ', error);
+    return null;
+  }
 };
 
+export async function reverseGeocode(latitude: number, longitude: number) {
+
+  if (isNaN(latitude) || isNaN(longitude)) {
+    console.error('Invalid latitude or longitude extracted from POINT:', latitude, longitude);
+    return null;
+  }
+
+  try {
+    const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+      params: {
+        latlng: `${latitude},${longitude}`,
+        key: 'AIzaSyAK01h9k7fI3BflEgwN169OX6oWptyqSc0'
+      }
+    });
+
+    if (response.data.status === 'OK') {
+      return response.data.results[0].formatted_address;
+    } else {
+      console.error('Reverse Geocoding failed:', response.data.status);
+      return "Address Not Found";
+    }
+  } catch (error) {
+    console.error('Error during reverse geocoding:', error);
+    return null;
+  }
+}

@@ -4,7 +4,7 @@ import { fetchFilteredPosts } from '@/app/lib/data';
 
 import { UserCircleIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { formatTimeForDisplay } from '@/app/lib/utils';
+import { formatTimeForDisplay, reverseGeocode } from '@/app/lib/utils';
 
 export default async function PostsTable({
 	query,
@@ -66,7 +66,7 @@ export default async function PostsTable({
 												From:
 											</h3>
 											<p className='text-md text-green-500 font-bold m-0'>
-												{post.start_location}
+												{reverseGeocode(post.start_latitude, post.start_longitude)}
 											</p>
 										</div>
 										<div className='col-span-3'>
@@ -74,7 +74,7 @@ export default async function PostsTable({
 												To:
 											</h3>
 											<p className='text-md text-green-500 font-bold m-0'>
-												{post.end_location}
+												{reverseGeocode(post.end_latitude, post.end_longitude)}
 											</p>
 										</div>
 									</div>
@@ -151,7 +151,7 @@ export default async function PostsTable({
 											href={`/dashboard/posts/${post.id}`}
 											key={post.id}
 											className='mb-2 w-full'>
-											{post.start_location}
+											{reverseGeocode(post.start_latitude, post.start_longitude)}
 										</Link>
 									</td>
 									<td className='whitespace-nowrap px-3 py-3'>
@@ -159,7 +159,7 @@ export default async function PostsTable({
 											href={`/dashboard/posts/${post.id}`}
 											key={post.id}
 											className='mb-2 w-full'>
-											{post.end_location}
+											{reverseGeocode(post.end_latitude, post.end_longitude)}
 										</Link>
 									</td>
 									<td className='whitespace-nowrap px-3 py-3'>
