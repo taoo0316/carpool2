@@ -5,16 +5,16 @@ export type User = {
   password: string;
 };
 
-// export type GeoLocation = {
-//   lat: number;
-//   lng: number;
-// };
+export type GeoLocation = {
+  latitude: number;
+  longitude: number;
+};
 
 export type Post = {
   id: string;
   author_id: string;
-  start_location: string;
-  end_location: string;
+  start_location: GeoLocation;
+  end_location: GeoLocation;
   ride_time: string;
   post_time: string;
   ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
@@ -26,10 +26,10 @@ export type Post = {
 export type LastestPost = {
   id: string;
   author_id: string;
-  start_location: string;
-  end_location: string;
-  // start_location: GeoLocation;
-  // end_location: GeoLocation;
+  start_latitude: number;
+  start_longitude: number;
+  end_latitude: number;
+  end_longitude: number;
   ride_time: string;
   post_time: string;
   ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
@@ -43,10 +43,10 @@ export type CurrentPost = {
   author_id: string;
   name: string;
   email: string;
-  start_location: string;
-  end_location: string;
-  // start_location: GeoLocation;
-  // end_location: GeoLocation;
+  start_latitude: number;
+  start_longitude: number;
+  end_latitude: number;
+  end_longitude: number;
   ride_time: string;
   post_time: string;
   ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
@@ -60,10 +60,10 @@ export type PostsTable = {
   author_id: string;
   name: string;
   email: string;
-  start_location: string;
-  end_location: string;
-  // start_location: GeoLocation;
-  // end_location: GeoLocation;
+  start_latitude: number;
+  start_longitude: number;
+  end_latitude: number;
+  end_longitude: number;
   ride_time: string;
   post_time: string;
   ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
@@ -83,10 +83,9 @@ export type Comment = {
 export type PostForm = {
   id: string;
   author_id: string;
-  start_location: string;
-  end_location: string;
-  // start_location: GeoLocation;
-  // end_location: GeoLocation;
+  start_location: GeoLocation;
+  end_location: GeoLocation;
+
   ride_time: string;
   post_time: string;
   ride_service: 'Grab' | 'Gojek' | 'Ryde' | 'ComfortDelGro' | 'TADA';
